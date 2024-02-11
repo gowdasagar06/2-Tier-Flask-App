@@ -1,31 +1,51 @@
 pipeline {
     agent any
-    
-    stages{
-        stage("Code"){
-            steps{
+    environment {
+        GIT_REPO_NAME = "Manifests-eks-argocd-2tier"
+        GIT_USER_NAME = "gowdasagar06"    
+        DEPLOYMENT_PATH = "argocd-eks-manifests/two-tier-app-deployment.yml"
+        DOCKER_IMAGE_NAME = "flaskapp" 
+        DOCKER_HUB_USER = "gowdasagar" 
+    }
+    stages {
+        stage("Code") {
+            steps {
                 git url: "https://github.com/gowdasagar06/2-Tier-Flask-App.git", branch: "main"
             }
         }
-        stage("Build & Test"){
-            steps{
-                sh "sudo docker build . -t flaskapp"
+        stage("Build & Test") {
+            steps {
+                sh "sudo docker build . -t ${DOCKER_IMAGE_NAME}:${BUILD_NUMBER}"
             }
         } 
-        stage("Push to DockerHub"){
-            steps{
-                withCredentials([usernamePassword(credentialsId:"dockerHub",passwordVariable:"dockerHubPass",usernameVariable:"dockerHubUser")]){
+        stage("Push to DockerHub") {
+            steps {
+                withCredentials([usernamePassword(credentialsId: "dockerHub", passwordVariable: "dockerHubPass", usernameVariable: "dockerHubUser")]) {
                     sh "sudo docker login -u ${env.dockerHubUser} -p ${env.dockerHubPass}"
-                    sh "sudo docker tag flaskapp ${env.dockerHubUser}/flaskapp:latest"
-                    sh "sudo docker push ${env.dockerHubUser}/flaskapp:latest" 
+                    sh "sudo docker tag ${DOCKER_IMAGE_NAME}:${BUILD_NUMBER} ${DOCKER_HUB_USER}/${DOCKER_IMAGE_NAME}:${BUILD_NUMBER}"
+                    sh "sudo docker push ${DOCKER_HUB_USER}/${DOCKER_IMAGE_NAME}:${BUILD_NUMBER}"
                 }
             }
         }
-        // stage("Deploy"){
-        //     steps{
-        //         sh "docker run -d --name mysql -v mysql-data:/var/lib/mysql -v ./message.sql:/docker-entrypoint-initdb.d/message.sql -e MYSQL_DATABASE=mydb  -e MYSQL_ROOT_PASSWORD="admin" -p 3306:3306 --network=twotier mysql:5.7"
-        //         sh "docker run -d --name flaskapp -v mysql-data:/var/lib/mysql -v ./message.sql:/docker-entrypoint-initdb.d/message.sql --network=twotier -e MYSQL_HOST=mysql -e MYSQL_USER=root -e MYSQL_PASSWORD=admin -e MYSQL_DB=mydb -p 5000:5000 flaskapp:latest"
-        //     }
-        // }
+        stage('Checkout Code') {
+            steps {
+                git branch: 'main', url: 'https://github.com/gowdasagar06/Manifests-eks-argocd-2tier.git'
+            }
+        }
+        stage('Update Deployment File') {
+            steps {
+                script {
+                    withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
+                        def NEW_IMAGE_NAME = "${DOCKER_HUB_USER}/${DOCKER_IMAGE_NAME}:${BUILD_NUMBER}"
+                        sh "sed -i 's|image: .*|image: $NEW_IMAGE_NAME |' ${DEPLOYMENT_PATH}"
+                        sh "git config --global user.email 'sagargowda6666@gmail.com' "
+                        sh "git config --global user.name 'gowdasagar06' "
+                        sh 'git add ${DEPLOYMENT_PATH}'
+                        sh "git commit -m 'Update image' "
+                        sh "git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main"
+                    }
+                }
+            }
+        }
     }
 }
