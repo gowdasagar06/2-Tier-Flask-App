@@ -27,7 +27,7 @@ spec:
                   name: mysql-secret
                   key: MYSQL_ROOT_PASSWORD
             - name: MYSQL_DATABASE
-              value: "mydb"
+              value: "myd"
             - name: MYSQL_USER
               value: "admin"
             - name: MYSQL_PASSWORD
@@ -46,4 +46,7 @@ spec:
         - name: mysql-pv-storage
           persistentVolumeClaim:
             claimName: ebs-pvc
+
+            # I'm variabling the db creds and adding this in jenkins cred so uisng envsubst i'm replacing the creds"
+            # sh "envsubst '\$DB_USER \$DB_PASS \$DB_NAME' < mysql-deployment.yml > mysql-deployment.yml"
 
