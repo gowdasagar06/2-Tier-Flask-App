@@ -27,7 +27,7 @@ spec:
                   name: mysql-secret
                   key: MYSQL_ROOT_PASSWORD
             - name: MYSQL_DATABASE
-              value: "DB_NAME"
+              value: "sagar"
             - name: MYSQL_USER
               value: "$DB_USER"
             - name: MYSQL_PASSWORD
