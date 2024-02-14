@@ -21,7 +21,7 @@ pipeline {
         }
         stage('Dependency Installation') {
             steps {
-                sh "sudo apt-get update"
+                sh "sudo apt-get update -y"
                 sh "sudo apt-get install -y libmysqlclient-dev"
                 sh "which pip3"
                 sh "pip install mysqlclient --global-option=build_ext --global-option=\"${MYSQLCLIENT_CFLAGS}\" --global-option=\"${MYSQLCLIENT_LDFLAGS}\""
