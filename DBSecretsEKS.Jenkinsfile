@@ -1,3 +1,7 @@
+// Task 1: Deploy an sample application using EKS into Jenkins.
+// Note : Don’t pass the secrets values directly (EX: use environment variables)
+
+
 pipeline {
     agent any
         tools {
