@@ -9,6 +9,7 @@ pipeline {
         GIT_USER_NAME = "gowdasagar06"    
         DEPLOYMENT_PATH = "argocd-eks-manifests/two-tier-app-deployment.yml"
         DOCKER_IMAGE_NAME = "flaskapp" 
+        // DOCKER_IMAGE_NAME = "2tier-blue-green" 
         DOCKER_HUB_USER = "gowdasagar" 
         MYSQLCLIENT_CFLAGS = '-I/usr/include/mysql'
         MYSQLCLIENT_LDFLAGS = '-L/usr/lib/x86_64-linux-gnu -lmysqlclient'
@@ -47,6 +48,9 @@ pipeline {
                      sh "sudo docker tag ${DOCKER_IMAGE_NAME}:${BUILD_NUMBER} ${DOCKER_HUB_USER}/${DOCKER_IMAGE_NAME}:latest"
                     sh "sudo docker push ${DOCKER_HUB_USER}/${DOCKER_IMAGE_NAME}:${BUILD_NUMBER}"
                      sh "sudo docker push ${DOCKER_HUB_USER}/${DOCKER_IMAGE_NAME}:latest"
+   
+                    //  sh "sudo docker tag ${DOCKER_IMAGE_NAME}:${BUILD_NUMBER} ${DOCKER_HUB_USER}/${DOCKER_IMAGE_NAME}:blue"
+                    //   sh "sudo docker push ${DOCKER_HUB_USER}/${DOCKER_IMAGE_NAME}:blue"
                 }
             }
         }
